@@ -1,0 +1,53 @@
+diff --git a/fdroidserver/common.py b/fdroidserver/common.py
+index bc4265e..bd1a4c8 100644
+--- a/fdroidserver/common.py
++++ b/fdroidserver/common.py
+@@ -3001,28 +3001,35 @@ def signer_fingerprint(cert_encoded):
+ 
+ def get_first_signer_certificate(apkpath):
+     """Get the first signing certificate from the APK, DER-encoded."""
++    class FDict(dict):
++        def __setitem__(self, k, v):
++            if k not in self:
++                super().__setitem__(k, v)
++
+     certs = None
+     cert_encoded = None
+-    with zipfile.ZipFile(apkpath, 'r') as apk:
+-        cert_files = [n for n in apk.namelist() if SIGNATURE_BLOCK_FILE_REGEX.match(n)]
+-        if len(cert_files) > 1:
+-            logging.error(_("Found multiple JAR Signature Block Files in {path}").format(path=apkpath))
+-            return None
+-        elif len(cert_files) == 1:
+-            cert_encoded = get_certificate(apk.read(cert_files[0]))
+-
+-    if not cert_encoded and use_androguard():
++    if use_androguard():
+         apkobject = _get_androguard_APK(apkpath)
+-        certs = apkobject.get_certificates_der_v2()
++        apkobject._v2_blocks = FDict()
++        certs = apkobject.get_certificates_der_v3()
+         if len(certs) > 0:
+-            logging.debug(_('Using APK Signature v2'))
++            logging.debug(_('Using APK Signature v3'))
+             cert_encoded = certs[0]
+         if not cert_encoded:
+-            certs = apkobject.get_certificates_der_v3()
++            certs = apkobject.get_certificates_der_v2()
+             if len(certs) > 0:
+-                logging.debug(_('Using APK Signature v3'))
++                logging.debug(_('Using APK Signature v2'))
+                 cert_encoded = certs[0]
+ 
++    if not cert_encoded:
++        with zipfile.ZipFile(apkpath, 'r') as apk:
++            cert_files = [n for n in apk.namelist() if SIGNATURE_BLOCK_FILE_REGEX.match(n)]
++            if len(cert_files) > 1:
++                logging.error(_("Found multiple JAR Signature Block Files in {path}").format(path=apkpath))
++                return None
++            elif len(cert_files) == 1:
++                cert_encoded = get_certificate(apk.read(cert_files[0]))
++
+     if not cert_encoded:
+         logging.error(_("No signing certificates found in {path}").format(path=apkpath))
+         return None
