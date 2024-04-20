@@ -1,0 +1,14 @@
+diff --git a/fdroidserver/common.py b/fdroidserver/common.py
+index e02d63c1..497b533f 100644
+--- a/fdroidserver/common.py
++++ b/fdroidserver/common.py
+@@ -3889,6 +3889,9 @@ def get_certificate(signature_block_file):
+                              asn1Spec=rfc2315.SignedData())[0]
+     try:
+         certificates = content.getComponentByName('certificates')
++        if len(certificates) != 1:
++            logging.error("Multiple certificates found.")
++            return None
+         cert = certificates[0].getComponentByName('certificate')
+     except PyAsn1Error:
+         logging.error("Certificates not found.")

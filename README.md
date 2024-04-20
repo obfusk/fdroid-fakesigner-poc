@@ -2,6 +2,12 @@
 
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
+Published: 2024-04-08; updated: 2024-04-14, 2024-04-20.
+
+## oss-security
+
+* https://www.openwall.com/lists/oss-security/2024/04/08/8
+
 ## Background
 
 We started looking into Android APK Signing Block oddities at the request of
@@ -59,6 +65,38 @@ of the one Android/`apksigner` does.  Note that we don't need a valid signature
 for the APK (we really only need a copy of the DER certificate, though having
 another APK signed with the certificate we want to use makes things easy).
 
+### Update (2024-04-14)
+
+Having been asked about multiple certificates in APK signatures [5], we realised
+that, like v2/v3 signatures, v1 signatures can indeed also contain multiple
+certificates (e.g. a certificate chain, though neither `jarsigner` nor
+`apksigner` seem to enforce any relationships between certificates).  However,
+unlike v2/v3 -- which guarantee that the certificate used for the signature is
+always the first in the sequence -- v1 does not define an ordering: the
+signature block file is a PKCS#7 DER-encoded ASN.1 data structure (per RFC 2315)
+and uses a SET for the list of certificates.
+
+Android/`apksigner` will find and use the first certificate that matches the
+relevant `SignerInfo`, ignoring any other certificates, but `fdroidserver`
+always returns the first certificate it finds in the signature block file.  Thus
+we can once again trick it into seeing any certificate we want -- as long as it
+only checks the v1 certificate (e.g. when the `fdroidserver.patch` has not been
+applied or the APK only has a v1 signature).
+
+NB: apps with `targetSdk >= 30` are required to have a v2/v3 signature.
+
+NB: Android < N will only check the first `SignerInfo`, later versions pick the
+first one that verifies if there are multiple.
+
+### Update (2024-04-20)
+
+Despite repeated warnings [5] that using the last certificate instead of the
+first one does not in any way fix the vulnerability described in the 2024-04-14
+update (PoC #3), the proposed patches for `fdroidserver` [10] and `androguard`
+[11] do exactly this.  With that patch, version A (which inserts the fake
+certificate first) of the PoC now fails, but version B (which inserts it last)
+now works.
+
 ## PoC
 
 NB: you currently need the `signing` branch of `apksigtool` [9].
@@ -102,12 +140,68 @@ $ jq '.packages[].versions[].manifest.signer.sha256' < repo/index-v2.json
 ]
 ```
 
+### Update (2024-04-14)
+
+NB: version A, for `fdroidserver` using the first v1 certificate.
+
+```bash
+$ python3 make-poc-v3a.py   # uses app2.apk (needs targetSdk < 30) as base, adds fake.apk .RSA cert
+$ python3 fdroid.py         # verifies and has fake.apk as signer according to F-Droid
+True
+43238d512c1e5eb2d6569f4a3afbf5523418b82e0a3ed1552770abb9a9c9ccab
+```
+
+### Update (2024-04-20)
+
+NB: version B, for `fdroidserver` using the last v1 certificate.
+
+```bash
+$ python3 make-poc-v3b.py   # uses app2.apk (needs targetSdk < 30) as base, adds fake.apk .RSA cert
+$ python3 fdroid.py         # verifies and has fake.apk as signer according to F-Droid
+True
+43238d512c1e5eb2d6569f4a3afbf5523418b82e0a3ed1552770abb9a9c9ccab
+```
+
 ## Patch
 
 The `fdroidserver.patch` changes the order so it matches Android's v3 before v2
 before v1, and monkey-patches `androguard` to see the first block instead of the
 last one if there are duplicates.  This is still likely to be incomplete, but
 prevents the known bypasses described here.
+
+### Update (2024-04-14)
+
+The `fdroidserver-multicert.patch` simply rejects any v1 signatures with
+multiple certificates.  This may reject some valid APKs, but handling those
+properly is nontrivial and there should be few APKs with multiple certificates
+and no v2/v3 signatures in the wild (e.g. the IzzyOnDroid repository found none
+in its catalog).  We recommend using the official `apksig` library (used by
+`apksigner`) to both verify APK signatures and return the first signer's
+certificate to avoid these kind of implementation inconsistencies and thus
+further vulnerabilities like this one.
+
+## Scanner (2024-04-15, 2024-04-20)
+
+The `scan.py` script can check APKs for *possible* signature issues: it will
+flag APKs that are not clearly signed with a single unambiguous certificate,
+which *could* result in the kind of accidental misidentification of the signer
+-- despite successful verification by `apksigner` -- that we've demonstrated
+here.  Unfortunately, such misidentification can easily happen as even the
+official documentation of the various signature schemes does not completely
+cover how Android/`apksigner` handles such cases.
+
+NB: this will flag some valid APKs too, e.g. those with certificate chains,
+those having used key rotation, or those with multiple signers; as the
+IzzyOnDroid repository found none in its catalog, these cases luckily seem to be
+relatively rare.
+
+```bash
+$ python3 scan.py poc*.apk
+'poc1.apk': Mismatch between v1 and v2/v3 certificates
+'poc2.apk': Duplicate block IDs
+'poc3a.apk': Multiple certificates in signature block file
+'poc3b.apk': Multiple certificates in signature block file
+```
 
 ## References
 
@@ -120,6 +214,8 @@ prevents the known bypasses described here.
 * [7] https://android.izzysoft.de/articles/named/iod-scan-apkchecks
 * [8] https://www.kuketz-blog.de/android-apps-auf-dem-seziertisch-eine-vertiefte-betrachtung/
 * [9] https://github.com/obfusk/apksigtool
+* [10] https://gitlab.com/fdroid/fdroidserver/-/merge_requests/1466
+* [11] https://github.com/androguard/androguard/pull/1038
 
 ## Links
 
