@@ -15,8 +15,8 @@ with zipfile.ZipFile("fake.apk", "r") as zf:
             meta = [(info, zf.read(info.filename))]
             break
 
-apksigcopier.copy_apk("app.apk", "poc-unsigned.apk")
-apksigcopier.patch_meta(meta, "poc-unsigned.apk")
+date_time = apksigcopier.copy_apk("app.apk", "poc-unsigned.apk")
+apksigcopier.patch_meta(meta, "poc-unsigned.apk", date_time=date_time)
 
 apksigtool.do_sign("poc-unsigned.apk", "poc.apk", cert="cert-rsa.der",
                    key="privkey-rsa.der", no_v1=True)
