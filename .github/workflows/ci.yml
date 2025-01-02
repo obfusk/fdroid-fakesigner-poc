@@ -24,30 +24,9 @@ jobs:
           persist-credentials: false
           submodules: true
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y apksigner \
-            python3-{asn1crypto,click,cryptography,pyasn1,pyasn1-modules,simplejson}
-          git clone -b v1.1.1 https://github.com/obfusk/apksigcopier.git
-          ( cd apksigcopier && make install )
-          git clone -b signing https://github.com/obfusk/apksigtool.git
-          ( cd apksigtool && make install )
-          git clone -b platform-tools-34.0.5 https://android.googlesource.com/platform/tools/apksig
-          ln -s apksig/src/test/resources/com/android/apksig/v2-ec-p256-targetSdk-30.apk app.apk
-          ln -s apksig/src/test/resources/com/android/apksig/golden-aligned-v1v2v3-out.apk app2.apk
-          wget -O fake.apk https://f-droid.org/F-Droid.apk
+        run: ./deps.sh
       - name: Make PoCs
-        run: |
-          ./make-key.sh
-          python3 make-poc-v1.py
-          mv poc.apk poc1.apk
-          python3 make-poc-v2.py
-          mv poc.apk poc2.apk
-          python3 make-poc-v3a.py
-          mv poc.apk poc3a.apk
-          python3 make-poc-v3b.py
-          mv poc.apk poc3b.apk
-          rm poc-unsigned.apk
+        run: ./make.sh
       - name: Upload artefacts
         uses: actions/upload-artifact@v4
         with:
