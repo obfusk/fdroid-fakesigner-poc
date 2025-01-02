@@ -1,0 +1,21 @@
+diff --git a/fdroidserver/common.py b/fdroidserver/common.py
+index e02d63c1..eb9ae1a1 100644
+--- a/fdroidserver/common.py
++++ b/fdroidserver/common.py
+@@ -3171,12 +3171,12 @@ def get_first_signer_certificate(apkpath):
+ 
+     if not cert_encoded:
+         with zipfile.ZipFile(apkpath, 'r') as apk:
+-            cert_files = [n for n in apk.namelist() if SIGNATURE_BLOCK_FILE_REGEX.match(n)]
+-            if len(cert_files) > 1:
++            cert_infos = [i for i in apk.infolist() if SIGNATURE_BLOCK_FILE_REGEX.match(i.orig_filename)]
++            if len(cert_infos) > 1:
+                 logging.error(_("Found multiple JAR Signature Block Files in {path}").format(path=apkpath))
+                 return None
+-            elif len(cert_files) == 1:
+-                cert_encoded = get_certificate(apk.read(cert_files[0]))
++            elif len(cert_infos) == 1:
++                cert_encoded = get_certificate(apk.read(cert_infos[0]))
+ 
+     if not cert_encoded:
+         logging.error(_("No signing certificates found in {path}").format(path=apkpath))

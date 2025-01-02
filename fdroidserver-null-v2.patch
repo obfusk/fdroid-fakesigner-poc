@@ -1,0 +1,49 @@
+diff --git a/fdroidserver/common.py b/fdroidserver/common.py
+index 5f812206..699e03d4 100644
+--- a/fdroidserver/common.py
++++ b/fdroidserver/common.py
+@@ -3272,24 +3272,36 @@ def get_first_signer_certificate(apkpath):
+         not (certs_v3 or certs_v2) and get_effective_target_sdk_version(apkobject) < 30
+     ):
+         with zipfile.ZipFile(apkpath, 'r') as apk:
+-            cert_files = [
+-                n for n in apk.namelist() if SIGNATURE_BLOCK_FILE_REGEX.match(n)
++            cert_infos = [
++                i for i in apk.infolist() if SIGNATURE_BLOCK_FILE_REGEX.match(i.orig_filename)
+             ]
+-            if len(cert_files) > 1:
++            if len(cert_infos) > 1:
+                 logging.error(
+                     _("Found multiple JAR Signature Block Files in {path}").format(
+                         path=apkpath
+                     )
+                 )
+                 return
+-            elif len(cert_files) == 1:
+-                signature_block_file = cert_files[0]
++            elif len(cert_infos) == 1:
++                signature_block_info = cert_infos[0]
++                signature_block_file = cert_infos[0].orig_filename
+                 signature_file = (
+-                    cert_files[0][: signature_block_file.rindex('.')] + '.SF'
++                    signature_block_file[: signature_block_file.rindex('.')] + '.SF'
+                 )
++                for info in apk.infolist():
++                    if info.orig_filename == signature_file:
++                        signature_info = info
++                        break
++                else:
++                    logging.error(
++                        _("Missing JAR Signature File in {path}").format(
++                            path=apkpath
++                        )
++                    )
++                    return
+                 cert_v1 = get_certificate(
+-                    apk.read(signature_block_file),
+-                    apk.read(signature_file),
++                    apk.read(signature_block_info),
++                    apk.read(signature_info),
+                 )
+                 found_certs.append(cert_v1)
+                 if not cert_encoded:
