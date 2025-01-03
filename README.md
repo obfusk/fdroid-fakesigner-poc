@@ -8,6 +8,7 @@ Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30.
 
 * https://www.openwall.com/lists/oss-security/2024/04/08/8
 * https://www.openwall.com/lists/oss-security/2024/04/20/3
+* https://www.openwall.com/lists/oss-security/2025/01/03/1
 
 ## Background
 
