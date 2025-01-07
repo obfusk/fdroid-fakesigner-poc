@@ -178,6 +178,9 @@ like this one".  We even provided a Python implementation for that.  All of our
 recommendations were ignored.  We find this careless approach to security far
 more worrying than the impact of the individual vulnerabilities described here.
 
+We sincerely wish this document didn't have to exist.  We implore F-Droid to do
+better, to live up to its potential, and do right by its community.
+
 ## PoC
 
 NB: you currently need the `signing` branch of `apksigtool` [9].
