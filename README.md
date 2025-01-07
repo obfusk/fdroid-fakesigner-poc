@@ -2,7 +2,7 @@
 
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
-Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30.
+Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06.
 
 ## oss-security
 
@@ -151,6 +151,32 @@ implementation mistakes and inconsistencies and thus further vulnerabilities.
 Handling common cases correctly is fairly easy, but handling edge cases
 correctly is hard; rolling your own implementation without the required
 expertise and care to get it right is irresponsible.
+
+### Update (2025-01-06)
+
+F-Droid claims that the latest vulnerability "does not affect the repository on
+f-droid.org".  Which suggests that they do not understand the significance of
+this certificate pinning bypass, or they do not believe certificate pinning is
+meant to provide protection against a compromise of an upstream repository
+without a compromise of the upstream signing key.  Both are worrying.
+
+All of the vulnerabilities described here were discovered by us *by accident*,
+looking into things like key rotation, signature copying, and security scans for
+IzzyOnDroid, not vulnerabilities in `fdroidserver`.  The first one was
+independently discovered and reported a year earlier, and subsequently ignored.
+
+The latest vulnerability, the incorrect regex, was not something we specifically
+predicted.  But we warned F-Droid that their approach to handling certificate
+pinning with custom code independent of the signature verification using
+`apksigner` was full of mistakes and fundamentally flawed, which proved to be
+correct again and again.
+
+We recommended "using the official `apksig` library (used by `apksigner`) to
+both verify APK signatures and return the first signer's certificate to avoid
+these kind of implementation inconsistencies and thus further vulnerabilities
+like this one".  We even provided a Python implementation for that.  All of our
+recommendations were ignored.  We find this careless approach to security far
+more worrying than the impact of the individual vulnerabilities described here.
 
 ## PoC
 
