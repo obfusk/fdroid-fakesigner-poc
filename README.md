@@ -2,7 +2,8 @@
 
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
-Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06.
+Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06,
+2025-01-08.
 
 ## oss-security
 
@@ -180,6 +181,15 @@ more worrying than the impact of the individual vulnerabilities described here.
 
 We sincerely wish this document didn't have to exist.  We implore F-Droid to do
 better, to live up to its potential, and do right by its community.
+
+### Update (2025-01-08)
+
+F-Droid now claims PoC 5a is not an "actionable security vulnerability" because
+"APKs signed by v1-only are not even installable on latest Android versions".
+This is false.  As long as `targetSdk < 30` (and e.g. the official F-Droid
+client has 29) they will install just fine.  I even confirmed this by installing
+my PoC APK on both Android 13 and 14 just in case, something they apparently
+neglected to bother with before making that claim.
 
 ## PoC
 
