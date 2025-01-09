@@ -207,8 +207,8 @@ Because the only way to fix the vulnerability was to monkey-patch `androguard`
 stable `fdroidserver` package received any patches, despite those packages being
 maintained by the F-Droid team, so that monkey patch is still needed).
 
-They are also downplaying the impact by insisting this vulnerability is only a
-problem for third party repositories relying on `fdroidserver`; which, even if
+They are also downplaying the impact by insisting these vulnerabilities are only
+a problem for third party repositories relying on `fdroidserver`; which, even if
 true, is showing a concerning disregard for the security of the repositories of
 other projects relying on `fdroidserver`.
 
