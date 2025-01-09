@@ -5,6 +5,11 @@ PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06,
 2025-01-08.
 
+**NB: no new updates will be provided solely to correct any further
+counterfactual statements by F-Droid.  We implore them to take responsibility
+for their mistakes instead of spreading misinformation in order to downplay our
+findings.**
+
 ## oss-security
 
 * https://www.openwall.com/lists/oss-security/2024/04/08/8
