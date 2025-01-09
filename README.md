@@ -3,7 +3,7 @@
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
 Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06,
-2025-01-08.
+2025-01-08, 2025-01-09.
 
 **NB: no new updates will be provided solely to correct any further
 counterfactual statements by F-Droid.  We implore them to take responsibility
@@ -195,6 +195,26 @@ This is false.  As long as `targetSdk < 30` (and e.g. the official F-Droid
 client has 29) they will install just fine.  We even confirmed this by
 installing the PoC APK on Android 13-15 just in case, something they apparently
 neglected to bother with before making that claim.
+
+### Update (2025-01-09)
+
+F-Droid now claims they can't use the patches as-is because of "code quality
+issues" (private APIs).  Which applies to exactly one patch: the one they
+already merged 8 months ago (`fdroidserver.patch`).
+
+Because the only way to fix the vulnerability was to monkey-patch `androguard`
+(and an updated version is still not available in Debian, nor has the Debian
+stable `fdroidserver` package received any patches, despite those packages being
+maintained by the F-Droid team, so that monkey patch is still needed).
+
+They are also downplaying the impact by insisting this vulnerability is only a
+problem for third party repositories relying on `fdroidserver`; which, even if
+true, is showing a concerning disregard for the security of the repositories of
+other projects relying on `fdroidserver`.
+
+Again, we find F-Droid's reaction and the security and code review processes on
+display here to be highly concerning, far more than the vulnerabilities we
+reported.
 
 ## PoC
 
