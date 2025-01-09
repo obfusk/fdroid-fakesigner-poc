@@ -187,9 +187,9 @@ better, to live up to its potential, and do right by its community.
 F-Droid now claims PoC 5a is not an "actionable security vulnerability" because
 "APKs signed by v1-only are not even installable on latest Android versions".
 This is false.  As long as `targetSdk < 30` (and e.g. the official F-Droid
-client has 29) they will install just fine.  I even confirmed this by installing
-my PoC APK on Android 13-15 just in case, something they apparently neglected to
-bother with before making that claim.
+client has 29) they will install just fine.  We even confirmed this by
+installing the PoC APK on Android 13-15 just in case, something they apparently
+neglected to bother with before making that claim.
 
 ## PoC
 
