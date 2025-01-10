@@ -86,6 +86,8 @@ Links:
   still uses their own custom code for certificate extraction instead of
   combining signature verification and certificate extraction into one step
   using `apksig` (for which code was provided to them, which they ignored).
+- This approach will likely result in further exploits being discovered and
+  should be considered fundamentally broken.
 - F-Droid has falsely claimed that "APKs signed by v1-only are not even
   installable on latest Android versions".
 - F-Droid has claimed to be unable to use the provided patches as-is because of
