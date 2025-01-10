@@ -100,6 +100,9 @@ Links:
   seemingly confirming that preventing publishing updates from compromised
   upstream repositories using cryptographic checks is not considered part of the
   security model of f-droid.org.
+- Despite being maintained by the F-Droid team, the Debian stable `fdroidserver`
+  and `androguard` packages still have not received any of the patches 8 months
+  later (almost two years after the first vulnerability was reported).
 
 Links:
 
