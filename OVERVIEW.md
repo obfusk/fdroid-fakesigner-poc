@@ -102,6 +102,12 @@ Links:
   seemingly confirming that preventing publishing updates from compromised
   upstream repositories using cryptographic checks is not considered part of the
   security model of f-droid.org.
+- F-Droid claims that the "goal of AllowedAPKSigningKeys is to make it easy for
+  non-technical people to manage binary APK repos securely" yet consistently
+  downplays the consequences as not affecting f-droid.org, seemingly
+  disregarding the consequences for those repositories relying on certificate
+  pinning for security for which the feature is ostensibly meant, and offering
+  no rationale for continuing to use a fundamentally broken implementation.
 - Despite being maintained by the F-Droid team, the Debian stable `fdroidserver`
   and `androguard` packages still have not received any of the patches 8 months
   later (almost two years after the first vulnerability was reported).
