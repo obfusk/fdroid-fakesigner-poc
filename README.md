@@ -17,6 +17,7 @@ NB: see also [`OVERVIEW.md`](OVERVIEW.md).
 * https://www.openwall.com/lists/oss-security/2024/04/08/8
 * https://www.openwall.com/lists/oss-security/2024/04/20/3
 * https://www.openwall.com/lists/oss-security/2025/01/03/1
+* https://www.openwall.com/lists/oss-security/2025/01/20/1
 
 ## Background
 
