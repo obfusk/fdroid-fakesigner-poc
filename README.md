@@ -3,7 +3,7 @@
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
 Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06,
-2025-01-08, 2025-01-09, 2025-01-10.
+2025-01-08, 2025-01-09, 2025-01-10, 2025-01-19.
 
 **NB: no new updates will be provided solely to correct any further
 counterfactual statements by F-Droid.  We implore them to take responsibility
@@ -218,6 +218,73 @@ Again, we find F-Droid's reaction and the security and code review processes on
 display here to be highly concerning, far more than the vulnerabilities we
 reported.
 
+### Update (2025-01-19)
+
+Quoting the response of F-Droid's Technical Lead [12]:
+
+> fdroidserver is fully safe for the tasks it was built for. It has been
+> independently audited as well (we have two more audits coming up). If you have
+> a trusted collection of APKs, then fdroidserver provides the entry point to a
+> trustworthy pipe to the F-Droid client. It cannot protect against malicious
+> upstreams, upstreams losing their signing keys, etc. It cannot fix the
+> deprecated v1 signatures. Require v2+ signatures, and AllowedAPKSigningKeys
+> works with no known weaknesses.
+
+Based on the above, we cannot but conclude that despite earlier claims that the
+"goal of AllowedAPKSigningKeys is to make it easy for non-technical people to
+manage binary APK repos securely", certificate pinning is in fact not expected
+to provide any security against e.g. updates from compromised upstream
+repositories as it assumes a "trusted collection of APKs".
+
+We wonder what exactly the intended purpose of certificate pinning is if not to
+ensure APKs can only be provided by someone in control of the upstream signing
+key, as this is the kind of security repositories like IzzyOnDroid expected it
+to provide.  We also observe that the 2018 audit predates the implementation of
+`AllowedAPKSigningKeys` certificate pinning.
+
+Another quote [13]:
+
+> [...] why #fdroidserver implements somethings in #Python rather than scraping
+> #apksigner output. Reliably and securely parsing CLI output over the long term
+> is really hard to get right because deployed fdroidserver code has to be
+> future proof, in that it has to support newer apksigner versions that might
+> have changed its output. For example, #fdroidserver is coded against apksigner
+> from build-tools version vX.0.0. Someone does `pip install fdroidserver`. Then
+> at some point, the user upgrades apksigner to version vY.0.0 which breaks the
+> parsing before fdroidserver supports apksigner vY.0.0. That breakage needs to
+> fail gracefully, and that is really hard to do. Much harder than just writing
+> pure Python code to extract the certificates which is tested against the
+> apksigner test suite. [...]
+
+We agree that parsing `apksigner` CLI output would be unreliable.  Which is why
+we recommended using the underlying `apksig` library which has a stable API and
+even provided code to do exactly that [14].  This suggestion has been
+consistently ignored with zero rationale given, other than clearly irrelevant
+objections to parsing CLI output.
+
+We vehemently disagree that the chosen approach of using custom Python code that
+does not verify the signatures and relies on matching specific *behaviour* of
+specific versions of `apksigner` (e.g. whether or not and how it verifies v3.1
+signatures) to extract the correct certificates is reliable or secure.  This is
+evidenced by the 6th PoC, which works because `fdroidserver` completely ignores
+the APK Signature Scheme v3.1 block (and does not use any v1 signatures).
+
+We find it concerning that F-Droid constantly chooses to move the goalposts and
+continues to rely on a fundamentally broken approach for certificate pinning,
+merely patching [15] known vulnerabilities without ever addressing the
+underlying cause.
+
+We reiterate once again that we recommended "using the official `apksig` library
+(used by `apksigner`) to both verify APK signatures and return the first
+signer's certificate to avoid these kind of implementation inconsistencies and
+thus further vulnerabilities [...]".
+
+Until a proper reliable implementation of certificate pinning using `apksig` is
+provided (if ever), we recommend repositories using `AllowedAPKSigningKeys`
+perform their own audit and assess whether the security they wish to provide
+requires performing certificate pinning themselves or switching to e.g.
+`apkrepotool`.
+
 ## PoC
 
 NB: you currently need the `signing` branch of `apksigtool` [9].
@@ -329,6 +396,17 @@ True
 43238d512c1e5eb2d6569f4a3afbf5523418b82e0a3ed1552770abb9a9c9ccab
 ```
 
+### Update (2025-01-19)
+
+NB: see code comments for requirements.
+
+```bash
+$ python3 make-poc-v6.py    # uses app4.apk, adds signing block from fake.apk
+$ python3 fdroid.py         # verifies and has fake.apk as signer according to F-Droid
+True
+43238d512c1e5eb2d6569f4a3afbf5523418b82e0a3ed1552770abb9a9c9ccab
+```
+
 ## Patch
 
 The `fdroidserver.patch` changes the order so it matches Android's v3 before v2
@@ -396,6 +474,13 @@ $ python3 scan.py poc[45]*.apk
 'poc5b.apk': NUL, LF, or CR in filename
 ```
 
+### Update (2025-01-19)
+
+```bash
+$ python3 scan.py poc6.apk
+'poc6.apk': No v3 certs even though v3.1 cert is present
+```
+
 ## References
 
 * [1] https://salsa.debian.org/reproducible-builds/diffoscope/-/issues/246
@@ -409,7 +494,12 @@ $ python3 scan.py poc[45]*.apk
 * [9] https://github.com/obfusk/apksigtool
 * [10] https://gitlab.com/fdroid/fdroidserver/-/merge_requests/1466
 * [11] https://github.com/androguard/androguard/pull/1038
+* [12] https://floss.social/@IzzyOnDroid/113765504171758318
+* [13] https://social.librem.one/@eighthave/113820301078034374
+* [14] https://gist.github.com/obfusk/cfab950649631c3ece723b9eb277304b
+* [15] https://gitlab.com/fdroid/fdroidserver/-/issues/1251
 
 ## Links
 
 * https://github.com/obfusk/apksigcopier
+* https://github.com/obfusk/apkrepotool

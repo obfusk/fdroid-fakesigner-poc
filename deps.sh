@@ -16,6 +16,7 @@ if [ ! -e fake.apk ]; then
   ln -s apksig/src/test/resources/com/android/apksig/v2-ec-p256-targetSdk-30.apk app.apk
   ln -s apksig/src/test/resources/com/android/apksig/golden-aligned-v1v2v3-out.apk app2.apk
   cp apksig/src/test/resources/com/android/apksig/v3-only-with-stamp.apk app3.apk
+  ln -s apksig/src/test/resources/com/android/apksig/original-minSdk33.apk app4.apk
   zip -d app3.apk stamp-cert-sha256
   wget -O fake.apk https://f-droid.org/archive/org.fdroid.fdroid_1017050.apk
 fi
