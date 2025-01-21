@@ -3,7 +3,7 @@
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
 Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06,
-2025-01-08, 2025-01-09, 2025-01-10, 2025-01-19.
+2025-01-08, 2025-01-09, 2025-01-10, 2025-01-19, 2025-01-21.
 
 **NB: no new updates will be provided solely to correct any further
 counterfactual statements by F-Droid.  We implore them to take responsibility
@@ -286,6 +286,35 @@ perform their own audit and assess whether the security they wish to provide
 requires performing certificate pinning themselves or switching to e.g.
 `apkrepotool`.
 
+### Update (2025-01-21)
+
+Quoting F-Droid's Technical Lead 8 months ago [16]:
+
+> This highlights one hazard of using multiple implementations of verification:
+> different implementations can open up exploit vectors.
+
+And yet this is exactly what he did despite our repeated warnings against doing
+so, which were ignored.
+
+> There is a public API in the Java apksig library, but fdroidserver is written
+> in Python.
+
+Which is exactly what we recommended using, even providing an example
+implementation of using `apksig` from Python one month earlier, which was
+ignored.
+
+> For repos made with collections of binary APKs, this more of a concern.
+> AllowedAPKSigningKeys was designed with these kinds of repos in mind.  Our
+> goal is to make it as simple as possible to safely run app repos.
+> AllowedAPKSigningKeys is a feature along those lines.  So this page is about
+> documenting what needs to happen to make AllowedAPKSigningKeys as reliable as
+> possible.
+
+Which contradicts recent statements that certificate pinning is in fact not
+expected to provide any such security as it assumes a "trusted collection of
+APKs".  And no further action was taken to actually make `AllowedAPKSigningKeys`
+"as reliable as possible" despite the shortcomings identified.
+
 ## PoC
 
 NB: you currently need the `signing` branch of `apksigtool` [9].
@@ -499,6 +528,7 @@ $ python3 scan.py poc6.apk
 * [13] https://social.librem.one/@eighthave/113820301078034374
 * [14] https://gist.github.com/obfusk/cfab950649631c3ece723b9eb277304b
 * [15] https://gitlab.com/fdroid/fdroidserver/-/issues/1251
+* [16] https://gitlab.com/fdroid/wiki/-/wikis/Internal/AllowedAPKSigningKeys
 
 ## Links
 
