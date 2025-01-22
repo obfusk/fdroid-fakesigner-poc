@@ -335,6 +335,15 @@ own code is simply ignoring v3.1 signatures: yet another example that "different
 implementations can open up exploit vectors" and still nothing done to address
 that underlying issue.
 
+NB: `apksigner` is correct to have added this extra check as v3.1 signatures
+should always have a corresponding v3 signature.  But the lack of a
+corresponding v3 signature does not have any security implications for Android,
+which correctly considers such signatures valid.  And there would have been no
+security implications for `fdroidserver` either if not for its fundamentally
+broken approach to extracting the certificate using custom Python code instead
+of relying on `apksig` for both verification and extraction to guarantee the
+extracted certificate is the same one actually used for verification.
+
 ## PoC
 
 NB: you currently need the `signing` branch of `apksigtool` [9].
