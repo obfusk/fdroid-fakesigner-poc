@@ -3,7 +3,7 @@
 PoC for `fdroidserver` `AllowedAPKSigningKeys` certificate pinning bypass.
 
 Published: 2024-04-08; updated: 2024-04-14, 2024-04-20, 2024-12-30, 2025-01-06,
-2025-01-08, 2025-01-09, 2025-01-10, 2025-01-19, 2025-01-21.
+2025-01-08, 2025-01-09, 2025-01-10, 2025-01-19, 2025-01-21, 2025-01-22.
 
 **NB: no new updates will be provided solely to correct any further
 counterfactual statements by F-Droid.  We implore them to take responsibility
@@ -315,6 +315,26 @@ expected to provide any such security as it assumes a "trusted collection of
 APKs".  And no further action was taken to actually make `AllowedAPKSigningKeys`
 "as reliable as possible" despite the shortcomings identified.
 
+### Update (2025-01-22)
+
+It seems F-Droid is now blaming the bugs in their own code on `apksigner` [17]:
+
+> apksigner v33.0.x falsely verifies invalid APK which leads to wrong cert
+> extracted for AllowedAPKSigningKeys
+
+They are clearly aware that the APK, whilst indeed containing a v3.1 signature
+without a corresponding v3 signature, is considered perfectly valid by Android
+itself and installs without any problems on Android 13-15:
+
+> I could install the poc-v6.apk in an SDK-34 emulator.
+
+Yet they blame `apksigner` versions supporting v3.1 signatures but lacking an
+extra check that was added in later versions instead of acknowledging that the
+reason `fdroidserver` incorrectly returns the wrong certificate is that their
+own code is simply ignoring v3.1 signatures: yet another example that "different
+implementations can open up exploit vectors" and still nothing done to address
+that underlying issue.
+
 ## PoC
 
 NB: you currently need the `signing` branch of `apksigtool` [9].
@@ -529,6 +549,7 @@ $ python3 scan.py poc6.apk
 * [14] https://gist.github.com/obfusk/cfab950649631c3ece723b9eb277304b
 * [15] https://gitlab.com/fdroid/fdroidserver/-/issues/1251
 * [16] https://gitlab.com/fdroid/wiki/-/wikis/Internal/AllowedAPKSigningKeys
+* [17] https://gitlab.com/fdroid/fdroidserver/-/issues/1253
 
 ## Links
 
